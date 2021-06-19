@@ -3,7 +3,9 @@
 ## 全部源码在最下面
 
 先上效果图
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210619201534438.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L295czE5ODEyMDA3,size_16,color_FFFFFF,t_70)
+
+![image](https://user-images.githubusercontent.com/78191612/122643509-bafb2500-d142-11eb-9410-e7af4a490682.png)
+
 之前没事干，看windows10自带的播放器有一(亿)点点不顺眼，然后想写一个播放器，
 正好有学了点pyqt5，然后就整了个离线播音乐放器，耗时4天，现在差不多也算是最终版本了吧，
 
