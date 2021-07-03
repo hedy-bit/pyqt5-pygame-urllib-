@@ -1,21 +1,18 @@
 
 
-## 全部源码在最下面
+## 全部源码在[https://github.com/hedy-bit/pyqt5-pygame-urllib-](https://github.com/hedy-bit/pyqt5-pygame-urllib-)
 
 先上效果图
-
-![image](https://user-images.githubusercontent.com/78191612/122643509-bafb2500-d142-11eb-9410-e7af4a490682.png)
-
+![image](https://img2020.cnblogs.com/blog/2442249/202107/2442249-20210703142109901-1198757383.png)
 之前没事干，看windows10自带的播放器有一(亿)点点不顺眼，然后想写一个播放器，
-正好有学了点pyqt5，然后就整了个离线播音乐放器，耗时4天，现在差不多也算是最终版本了吧，
+正好有学了点pyqt5，又正好学了一点爬虫，然后就整了个播音乐播放器，耗时4天，，可以爬网易云，酷狗，qq，酷我，现在差不多也算是最终版本了吧，
+
+这个是爬虫版本：[https://github.com/hedy-bit/pyqt5-pygame-urllib-](https://github.com/hedy-bit/pyqt5-pygame-urllib-)
+这个是离线版本：[离线播放器链接](https://blog.csdn.net/oys19812007/article/details/116886015?spm=1001.2014.3001.5501)
+如果接下来有时间的话也会继续更新下去
 
 
-如果接下来有时间的话也会继续更新下去，链接：[离线播放器链接](https://blog.csdn.net/oys19812007/article/details/116886015?spm=1001.2014.3001.5501)
-![!\[在这里插入图片描述\](https://img-blog.csdnimg.cn/20210619202416128.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L295czE5ODEyMDA3,size_16,color_FFFFFF,t_70](https://img-blog.csdnimg.cn/20210619205134777.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L295czE5ODEyMDA3,size_16,color_FFFFFF,t_70)
 
-
-
-然后最近没有事情要做，就写了一个网络音乐播放器，结构跟离线版本差不多主要更新了逻辑，添加了爬虫模块
 
 
 
@@ -31,58 +28,95 @@ class PAThread(QThread):
         # 初始化函数
         super(PAThread, self).__init__()
 
-    def run(self):
-        global urls
-        global songs
-        global name
-        print ('type')
-        print ('begin looking')
-        url = 'https://defcon.cn/dmusic/'
-        name = name
+    def get_info(self, url):
+        global proxies
+        global tryed
+        print('start get info')
+        print(tryed)
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
-            'X-Requested-With': 'XMLHttpRequest'
-
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/491.10.2623.122 Safari/537.36'
         }
-        urls = []
-        songs = []
-        if  int(page) == '' or int(page) < 1:
-            pages = 2
-        else:
-            pages = int(page)
-        print (pages)
-        for a in range(1, pages):
+        web_data = requests.get(url, headers=headers)
+        soup = BeautifulSoup(web_data.text, 'lxml')
+        ranks = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(tryed)))
+        titles = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(tryed)))
+        times = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(6)'.format(str(tryed)))
+        for rank, title, time in zip(ranks, titles, times):
+            data = {
+                'IP': rank.get_text(),
+                'duan': title.get_text(),
+                'time': time.get_text()
+            }
+            q = str('http://' + str(rank.get_text()) + '/' + str(title.get_text()))
+            proxies = {
+                'http': q
+            }
+            print(proxies)
 
-            params = {'input': name,
-                      'filter': 'name',
-                      'type': type,
-                      'page': a
-                      }
+    def run(self):
+        qmut.lock()
+        try:
+            global urls
+            global songs
+            global name
+            global songid
+            global proxies
+            global pic
+            print('type')
+            print('begin looking')
+            url = 'https://defcon.cn/dmusic/'
+            name = name
+            self.get_info('https://www.kuaidaili.com/free/inha')
+            print(proxies)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.110.430.128 Safari/537.36',
+                'X-Requested-With': 'XMLHttpRequest'
 
-            res = requests.post(url, params, headers=headers)
-            html = res.json()
+            }
+            urls = []
+            songs = []
+            pic = []
+            if int(page) == '' or int(page) < 1:
+                pages = 2
+            else:
+                pages = int(page)
+            print(pages)
+            for a in range(1, pages):
 
-            for i in range(0, 10):
-                try:
-                    title = jsonpath.jsonpath(html, '$..title')[i]
-                    author = jsonpath.jsonpath(html, '$..author')[i]
-                    url1 = jsonpath.jsonpath(html, '$..url')[i]  # 取下载网址
-                    lrc = jsonpath.jsonpath(html, '$..lrc')[i]  # 取歌词
-                    print(title, author)
-                    urls.append(url1)
-                    songs.append(str(title) + ' - ' + str(author))
-                    # self.textEdit.setText(lrc)  # 打印歌词
-                    # print(lrc)
-                except:
-                    pass
+                params = {'input': name,
+                          'filter': 'name',
+                          'type': type,
+                          'page': a
+                          }
 
-        print(urls)
-        print(songs)
+                res = requests.post(url, params, headers=headers, proxies=proxies)
+                html = res.json()
 
-        self.trigger.emit(str('finish'))
+                for i in range(0, 10):
+                    try:
+                        title = jsonpath(html, '$..title')[i]
+                        author = jsonpath(html, '$..author')[i]
+                        url1 = jsonpath(html, '$..url')[i]  # 取下载网址
+                        pick = jsonpath(html, '$..pic')[i]  # 取歌词
+                        print(title, author)
+                        urls.append(url1)
+                        pic.append(pick)
+                        songs.append(str(title) + ' - ' + str(author))
+                        # self.textEdit.setText(lrc)  # 打印歌词
+                        # print(lrc)
+                    except:
+                        pass
+
+                print(urls)
+                print(songs)
+                self.trigger.emit(str('finish'))
+        except:
+            print('pa error')
+            self.trigger.emit(str('unfinish'))
+        qmut.unlock()
 ```
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210619203338714.png)
-然后就是从爬取的url下载歌曲
+然后就是从爬取的url下载歌曲，由于我设计了两个歌单，所以我写了两个类
 
 ```python
 class WorkThread(QThread):
@@ -93,23 +127,158 @@ class WorkThread(QThread):
         # 初始化函数
         super(WorkThread, self).__init__()
 
+    def cbk(self, a, b, c):
+        '''''回调函数
+        @a:已经下载的数据块
+        @b:数据块的大小
+        @c:远程文件的大小
+        '''
+        per = 100.0 * a * b / c
+        if per > 100:
+            per = 100
+        # print   ('%.2f%%' % per)
+        self.trigger.emit(str('%.2f%%' % per))
+
     def run(self):
         try:
             global number
             global path
             global downloading
+            global pic
+            proxies = {
+                'http': 'http://124.72.109.183:8118',
+                ' Shttp': 'http://49.85.1.79:31666'
+
+            }
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
                 'X-Requested-With': 'XMLHttpRequest'}
+            try:
+                try:
+                    try:
+                        aq = pic[num]
+                        aqq = aq.split('/')
 
-            url1 = urls[num]
-            print(url1)
-            os.makedirs('music', exist_ok=True)
-            number = number +1
-            path = 'music\{}.mp3'.format(number)
-            urlretrieve(url1, path)  # 下载函数的使用
+                    except:
+                        pass
+
+                    if type == 'kugou' and len(aqq) - 1 == 6:
+                        aqqe = str(aqq[0]) + str('//') + str(aqq[2]) + str('/') + str(aqq[3]) + str('/') + str(
+                            '400') + str('/') + str(aqq[5]) + str('/') + str(aqq[6])
+                        print(aqqe)
+                    elif type == 'netease' and len(aqq) - 1 == 4:
+                        aqn = aq.split('?')
+                        b = '?param=400x400'
+                        aqqe = (str(aqn[0]) + str(b))
+                        print(aqqe)
+                    else:
+                        aqqe = pic[num]
+                    req = requests.get(aqqe)
+
+                    checkfile = open('./music/ls1.png', 'w+b')
+                    for i in req.iter_content(100000):
+                        checkfile.write(i)
+
+                    checkfile.close()
+                    lsfile = './music/ls1.png'
+                    safile = './music/back.png'
+                    draw(lsfile, safile)
+                except:
+                    pass
+                url1 = urls[num]
+                print(url1)
+                os.makedirs('music', exist_ok=True)
+                number = number + 1
+                path = 'music\{}.临时文件'.format(number)
+                urlretrieve(url1, path, self.cbk)  # 下载函数的使用
+                to = 'downloadmusic\{}.mp3'.format(songs[num])
+                os.makedirs('downloadmusic', exist_ok=True)
+            except:
+                pass
+
+            try:
+                copyfile(path, to)
+            except:
+                pass
             downloading = False
             self.trigger.emit(str('finish'))
+
+        except:
+            self.trigger.emit(str('nofinish'))
+
+
+class WorkThread2(QThread):
+    # 自定义信号对象。参数str就代表这个信号可以传一个字符串
+    trigger = pyqtSignal(str)
+
+    def __int__(self):
+        # 初始化函数
+        super(WorkThread, self).__init__()
+
+    def cbk(self, a, b, c):
+        '''''回调函数
+        @a:已经下载的数据块
+        @b:数据块的大小
+        @c:远程文件的大小
+        '''
+        per = 100.0 * a * b / c
+        if per > 100:
+            per = 100
+        # print   ('%.2f%%' % per)
+        self.trigger.emit(str('%.2f%%' % per))
+
+    def run(self):
+        try:
+            global number
+            global path
+            global downloading
+            proxies = {
+                'http': 'http://124.72.109.183:8118',
+                'http': 'http://49.85.1.79:31666'
+
+            }
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+                'X-Requested-With': 'XMLHttpRequest'}
+            try:
+
+                if type == 'kugou':
+                    aq = picd[num]
+                    aqq = aq.split('/')
+                    aqqe = str(aqq[0]) + str('//') + str(aqq[2]) + str('/') + str(aqq[3]) + str('/') + str('400') + str(
+                        '/') + str(aqq[5]) + str('/') + str(aqq[6])
+                    print(aqqe)
+                else:
+                    aqqe = picd[num]
+                req = requests.get(aqqe)
+
+                checkfile = open('./music/ls1.png', 'w+b')
+                for i in req.iter_content(100000):
+                    checkfile.write(i)
+
+                checkfile.close()
+                lsfile = './music/ls1.png'
+                safile = './music/back.png'
+                draw(lsfile, safile)
+
+                url1 = urled[num]
+                print(url1)
+                os.makedirs('music', exist_ok=True)
+                number = number + 1
+                path = 'music\{}.临时文件'.format(number)
+                urlretrieve(url1, path, self.cbk)  # 下载函数的使用
+                to = 'downloadmusic\{}.mp3'.format(songed[num])
+                os.makedirs('downloadmusic', exist_ok=True)
+            except:
+                pass
+
+            try:
+                copyfile(path, to)
+            except:
+                pass
+            downloading = False
+            self.trigger.emit(str('finish'))
+
         except:
             self.trigger.emit(str('nofinish'))
 ```
@@ -346,4 +515,4 @@ class WorkThread(QThread):
 **代码介绍在这里就结束了，如果有更好的修改方案请私信我**
 
 最后是全部代码，
-
+[https://github.com/hedy-bit/pyqt5-pygame-urllib-](https://github.com/hedy-bit/pyqt5-pygame-urllib-)
