@@ -3,7 +3,8 @@
 ## 全部源码在[https://github.com/hedy-bit/pyqt5-pygame-urllib-](https://github.com/hedy-bit/pyqt5-pygame-urllib-)
 
 先上效果图
-![image](https://img2020.cnblogs.com/blog/2442249/202107/2442249-20210703142109901-1198757383.png)
+![image](https://user-images.githubusercontent.com/78191612/125190340-267e7100-e26f-11eb-84de-3fd6ecee0d4c.png)
+
 之前没事干，看windows10自带的播放器有一(亿)点点不顺眼，然后想写一个播放器，
 正好有学了点pyqt5，又正好学了一点爬虫，然后就整了个播音乐播放器，耗时4天，，可以爬网易云，酷狗，qq，酷我，现在差不多也算是最终版本了吧，
 
