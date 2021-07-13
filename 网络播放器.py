@@ -5,9 +5,9 @@ import ctypes
 import inspect
 import sys
 from decimal import Decimal
+from functools import partial
 from shutil import copyfile, rmtree
 from urllib.request import urlretrieve
-
 
 from bs4 import BeautifulSoup
 from eyed3 import load
@@ -18,7 +18,7 @@ import os
 from PIL import Image, ImageDraw, ImageFilter
 
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QLabel, QListWidgetItem, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QLabel, QListWidgetItem, QLineEdit, QComboBox, QMenu, QAction
 from PyQt5.QtCore import QTimer, Qt, QThread, pyqtSignal, QMutex
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtWidgets, QtCore
@@ -28,6 +28,9 @@ import random
 import requests
 from pygame import mixer
 from subprocess import call
+from ast import literal_eval
+listq = 'boing'
+numm = 0
 lrcd = []
 path = ''
 number = 1
@@ -57,11 +60,15 @@ lrcs = []
 lrct = []
 paing = False
 apdata = os.getenv("APPDATA")
-data = str(apdata)+'\music'
-print (data)
+data = str(apdata) + '\music'
+print(data)
 to = ''
 timenum = 0
 start = False
+loves = []
+loveurls = []
+lovepics = []
+lovelrc = []
 try:
     os.mkdir(data)
 except:
@@ -78,10 +85,10 @@ class barThread(QThread):
 
     def run(self):
         xun4 = 1
-        #print ('begin')
+        # print ('begin')
         try:
 
-            #print ('check')
+            # print ('check')
             time.sleep(1)
             try:
                 try:
@@ -89,19 +96,19 @@ class barThread(QThread):
                     xun4 = 1
                     while xun4 < 2:
                         time.sleep(1)
-                        #print ('check')
+                        # print ('check')
                         if not downloading or not paing:
                             try:
-                                #print ('check pass')
+                                # print ('check pass')
                                 timenumm = timenum * 10000
-                                #print (timenumm)
+                                # print (timenumm)
                                 current = mixer.music.get_pos()  # 毫秒
                                 current %= timenumm
                                 assq = current / timenumm * 10000
-                                #print(current)
+                                # print(current)
 
                                 assq = int(assq * 10)
-                                #print(assq)
+                                # print(assq)
                                 if not assq > 10000:
                                     self.trigger.emit(str(assq))
 
@@ -120,11 +127,9 @@ class barThread(QThread):
 
 
             except:
-                        pass
+                pass
         except:
             pass
-
-
 
 
 class startThread(QThread):
@@ -136,19 +141,68 @@ class startThread(QThread):
         super(startThread, self).__init__()
 
     def run(self):
+        try:
+            apdataas = os.getenv("APPDATA")
+            filepathas = '{}/musicdata'.format(apdataas)
+            global lovelrc
+            global loveurls
+            global loves
+            global lovepics
+            global voice
+            try:
+                with open(filepathas + "/voice", 'r',encoding='utf-8') as f:
+                        a = f.read()
+                        #print(a)
+                        voice = float(a)
+                print (voice)
+                self.trigger.emit(str('voicedone'))
+            except:
+                self.trigger.emit(str('voicedone'))
+                pass
+
+            with open(filepathas + "/loves", 'r',encoding='utf-8') as f:
+                    a = f.read()
+                    print(a)
+            strer = a
+            loves = literal_eval(strer)
+
+            with open(filepathas + "/lovepics", 'r',encoding='utf-8') as f:
+                    a = f.read()
+                    print(a)
+            strer = a
+            lovepics = literal_eval(strer)
+
+            with open(filepathas + "/loveurls", 'r',encoding='utf-8') as f:
+                    a = f.read()
+                    print(a)
+            strer = a
+            loveurls = literal_eval(strer)
+
+            with open(filepathas + "/lovelrc", 'r',encoding='utf-8') as f:
+                    a = f.read()
+                    print(a)
+            strer = a
+            lovelrc = literal_eval(strer)
+            self.trigger.emit(str('login'))
+            print (loves)
+            print ('read finish')
+        except:
+            print('read error')
+            pass
+
 
         try:
             get_info('https://www.kuaidaili.com/free/inha')
             try:
                 try:
                     req = requests.get('https://api.dujin.org/bing/1920.php')
-                    checkfile = open(str(data+'/ls2.png'), 'w+b')
+                    checkfile = open(str(data + '/ls2.png'), 'w+b')
                     for i in req.iter_content(100000):
                         checkfile.write(i)
 
                     checkfile.close()
-                    lsfile = str(data+'/ls2.png')
-                    safile = str(data+'/backdown.png')
+                    lsfile = str(data + '/ls2.png')
+                    safile = str(data + '/backdown.png')
                     draw(lsfile, safile)
                 except:
                     print('图片下载错误')
@@ -304,20 +358,20 @@ class WorkThread(QThread):
                             aqqe = pic[num]
                         req = requests.get(aqqe)
 
-                        checkfile = open(str(data+'/ls1.png'), 'w+b')
+                        checkfile = open(str(data + '/ls1.png'), 'w+b')
                         for i in req.iter_content(100000):
                             checkfile.write(i)
 
                         checkfile.close()
-                        lsfile = str(data+'/ls1.png')
-                        safile = str(data+'/back.png')
+                        lsfile = str(data + '/ls1.png')
+                        safile = str(data + '/back.png')
                         draw(lsfile, safile)
                     except:
                         pass
                     url1 = urls[num]
                     print(url1)
                     number = number + 1
-                    path = str(data+'\{}.临时文件'.format(number))
+                    path = str(data + '\{}.临时文件'.format(number))
                     urlretrieve(url1, path, self.cbk)  # 下载函数的使用
                     to = 'downloadmusic\{}.mp3'.format(songs[num])
                     os.makedirs('downloadmusic', exist_ok=True)
@@ -327,9 +381,9 @@ class WorkThread(QThread):
                     if bo == 'boing':
                         lrct = []
                         f = lrcs[num]  # 按行读取
-                        #print (f)
+                        # print (f)
                         lines = f.split('\n')
-                        #print (lines)
+                        # print (lines)
                         if not lines == ['']:
                             for i in lines:
                                 if not i == '':
@@ -340,18 +394,18 @@ class WorkThread(QThread):
                                             pass
                                         else:
                                             linew = line2[1]
-                                            #print(linew)
+                                            # print(linew)
                                             lrct.append(linew)
                                         self.trigger.emit(str('lrcfinish'))
                                     except:
-                                       print('{}的歌词错误'.format(str(line1)))
+                                        print('{}的歌词错误'.format(str(line1)))
                                 else:
                                     pass
                         else:
                             self.trigger.emit(str('lrcnofinish'))
-                            print ('没有歌词')
+                            print('没有歌词')
                 except:
-                    print ('歌词错误')
+                    print('歌词错误')
                 try:
                     copyfile(path, to)
                 except:
@@ -361,7 +415,7 @@ class WorkThread(QThread):
 
             except:
                 self.trigger.emit(str('nofinish'))
-        else:
+        elif bo == 'boed':
             try:
                 proxies = {
                     'http': 'http://124.72.109.183:8118',
@@ -448,6 +502,93 @@ class WorkThread(QThread):
 
             except:
                 self.trigger.emit(str('nofinish'))
+        elif bo == 'love':
+            try:
+                proxies = {
+                    'http': 'http://124.72.109.183:8118',
+                    'http': 'http://49.85.1.79:31666'
+
+                }
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+                    'X-Requested-With': 'XMLHttpRequest'}
+                try:
+                    try:
+                        try:
+                            aq = lovepics[num]
+                            aqq = aq.split('/')
+
+                        except:
+                            pass
+                        if type == 'kugou' and len(aqq) - 1 == 6:
+                            aqqe = str(aqq[0]) + str('//') + str(aqq[2]) + str('/') + str(aqq[3]) + str('/') + str(
+                                '400') + str('/') + str(aqq[5]) + str('/') + str(aqq[6])
+                            print(aqqe)
+                        elif type == 'netease' and len(aqq) - 1 == 4:
+                            aqn = aq.split('?')
+                            b = '?param=400x400'
+                            aqqe = (str(aqn[0]) + str(b))
+                            print(aqqe)
+                        else:
+                            aqqe = lovepics[num]
+                        req = requests.get(aqqe)
+
+                        checkfile = open(str(data + '/ls1.png'), 'w+b')
+                        for i in req.iter_content(100000):
+                            checkfile.write(i)
+
+                        checkfile.close()
+                        lsfile = str(data + '/ls1.png')
+                        safile = str(data + '/back.png')
+                        draw(lsfile, safile)
+
+                    except:
+                        pass
+
+                    url1 = loveurls[num]
+                    print(url1)
+                    # os.makedirs('music', exist_ok=True)
+                    number = number + 1
+                    path = str(data + '\{}.临时文件'.format(number))
+                    urlretrieve(url1, path, self.cbk)  # 下载函数的使用
+                    to = 'downloadmusic\{}.mp3'.format(songed[num])
+                    os.makedirs('downloadmusic', exist_ok=True)
+                except:
+                    self.trigger.emit(str('nofinish'))
+                    pass
+
+                try:
+
+                    lrct = []
+                    f = lovelrc[num]  # 按行读取
+                    # print(f)
+                    lines = f.split('\n')
+                    # print(lines)
+                    for i in lines:
+                        line1 = i.split('[')
+                        try:
+                            line2 = line1[1].split(']')
+                            if line2 == '':
+                                pass
+                            else:
+                                linew = line2[1]
+                                # print(linew)
+                                lrct.append(linew)
+                            self.trigger.emit(str('lrcfinish'))
+                        except:
+                            print('歌词错误')
+                except:
+                    pass
+
+                try:
+                    copyfile(path, to)
+                except:
+                    pass
+                downloading = False
+                self.trigger.emit(str('finish'))
+
+            except:
+                self.trigger.emit(str('nofinish'))
 
 
 class MainUi(QtWidgets.QMainWindow):
@@ -467,13 +608,6 @@ class MainUi(QtWidgets.QMainWindow):
         t1 = threading.Thread(target=self.action)
         t1.setDaemon(True)
         t1.start()
-        try:
-            mixer.init()
-            mixer.music.set_volume(voice)
-            k = Decimal(voice).quantize(Decimal('0.00'))
-            self.label3.setText('音量：{}'.format(str(k * 100) + '%'))
-        except:
-            pass
 
     def init_ui(self):
         global type
@@ -525,7 +659,6 @@ class MainUi(QtWidgets.QMainWindow):
         self.tabWidget = QtWidgets.QTabWidget(self)
         self.tabWidget.setGeometry(QtCore.QRect(33, 20, 716, 471))
 
-
         self.tabWidget.setStyleSheet('''QWidget#tab{background-color:#2B2B2B;}\
                                  QTabBar::tab{background-color:#3C3F41;color:#BBBBBB}\
                                  QTabBar::tab::selected{background-color:#212226;color:white}\
@@ -536,14 +669,14 @@ class MainUi(QtWidgets.QMainWindow):
                                     }
                                  ''')
 
-
-
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.tab_layout = QtWidgets.QGridLayout()
         self.tab.setLayout(self.tab_layout)
         self.listwidget = QtWidgets.QListWidget(self.tab)
         self.listwidget.doubleClicked.connect(lambda: self.change_func(self.listwidget))
+        self.listwidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listwidget.customContextMenuRequested[QtCore.QPoint].connect(self.myListWidgetContext)
         self.listwidget.setStyleSheet('''
         QListWidget{background-color:#2B2B2B;color:#222225}
         QScrollBar:vertical {              
@@ -555,7 +688,7 @@ class MainUi(QtWidgets.QMainWindow):
         ''')
         self.listwidget.setObjectName("listWidget")
         self.tab_layout.addWidget(self.listwidget, 0, 0, 1, 1)
-        self.tabWidget.addTab(self.tab, "搜索页")
+        self.tabWidget.addTab(self.tab, "      搜索页      ")
 
         self.tab2 = QtWidgets.QWidget()
         self.tab2.setObjectName("tab")
@@ -563,6 +696,8 @@ class MainUi(QtWidgets.QMainWindow):
         self.tab2.setLayout(self.tab2_layout)
         self.listwidget2 = QtWidgets.QListWidget(self.tab2)
         self.listwidget2.doubleClicked.connect(lambda: self.change_funcse(self.listwidget2))
+        self.listwidget2.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listwidget2.customContextMenuRequested[QtCore.QPoint].connect(self.myListWidgetContext2)
         self.listwidget2.setStyleSheet('''
         QListWidget{background-color:#2B2B2B;color:#222225}
         QScrollBar:vertical {              
@@ -575,14 +710,16 @@ class MainUi(QtWidgets.QMainWindow):
         self.listwidget2.setObjectName("listWidget2")
         self.listwidget2.setContextMenuPolicy(3)
         self.tab2_layout.addWidget(self.listwidget2, 0, 0, 1, 1)
-        self.tabWidget.addTab(self.tab2, "最近播放")
+        self.tabWidget.addTab(self.tab2, "      最近播放      ")
 
         self.tab3 = QtWidgets.QWidget()
         self.tab3.setObjectName("tab")
         self.tab3_layout = QtWidgets.QGridLayout()
         self.tab3.setLayout(self.tab3_layout)
         self.listwidget3 = QtWidgets.QListWidget(self.tab3)
-        self.listwidget3.doubleClicked.connect(lambda: self.change_func(self.listwidget))
+        self.listwidget3.doubleClicked.connect(lambda: self.change_funclove(self.listwidget3))
+        self.listwidget3.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listwidget3.customContextMenuRequested[QtCore.QPoint].connect(self.myListWidgetContext3)
         self.listwidget3.setStyleSheet('''
         QListWidget{background-color:#2B2B2B;color:#222225}
         QScrollBar:vertical {              
@@ -594,14 +731,14 @@ class MainUi(QtWidgets.QMainWindow):
         ''')
         self.listwidget3.setObjectName("listWidget3")
         self.tab3_layout.addWidget(self.listwidget3, 0, 0, 1, 1)
-        self.tabWidget.addTab(self.tab3, "喜爱的歌")
+        self.tabWidget.addTab(self.tab3, "      喜爱的歌      ")
 
         self.tab4 = QtWidgets.QWidget()
         self.tab4.setObjectName("tab")
         self.tab4_layout = QtWidgets.QGridLayout()
         self.tab4.setLayout(self.tab4_layout)
         self.listwidget4 = QtWidgets.QListWidget(self.tab4)
-        #self.listwidget4.doubleClicked.connect(lambda: self.change_func(self.listwidget))
+        # self.listwidget4.doubleClicked.connect(lambda: self.change_func(self.listwidget))
         self.listwidget4.setStyleSheet('''
         QListWidget{background-color:#2B2B2B;color:#222225}
         QScrollBar:vertical {              
@@ -613,10 +750,9 @@ class MainUi(QtWidgets.QMainWindow):
         ''')
         self.listwidget4.setObjectName("listWidget4")
         self.tab4_layout.addWidget(self.listwidget4, 0, 0, 1, 1)
-        self.tabWidget.addTab(self.tab4, "歌词")
+        self.tabWidget.addTab(self.tab4, "      歌词      ")
 
         self.right_layout.addWidget(self.tabWidget, 3, 0, 100, 90)
-
 
         self.left_close = QtWidgets.QPushButton("")  # 关闭按钮
         self.left_close.clicked.connect(self.close)
@@ -681,7 +817,7 @@ QLineEdit:focus {
         self.left_layout.addWidget(self.button_1234, 4, 2, 2, 1)
 
         self.button_1234 = QtWidgets.QPushButton(qtawesome.icon('fa.heart', color='#3FC89C', font=24), "")
-        self.button_1234.clicked.connect(self.down)
+        self.button_1234.clicked.connect(self.lovesong)
         self.button_1234.setStyleSheet(
             '''QPushButton{background:#222225;border-radius:5px;}QPushButton:hover{background:#3684C8;}''')
         self.left_layout.addWidget(self.button_1234, 4, 3, 2, 2)
@@ -703,7 +839,7 @@ QLineEdit:focus {
 
         self.label5 = QLabel(self)
         # self.label5.setScaledContents(True)
-        pix_img = QtGui.QPixmap(str(data+'/backdown.png'))
+        pix_img = QtGui.QPixmap(str(data + '/backdown.png'))
         pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
         self.label5.setPixmap(pix)
         # self.label5.setMaximumSize(1,1)
@@ -752,10 +888,15 @@ QLineEdit:focus {
         self.up_layout.addWidget(self.label61, 0, 200, 1, 50)
 
         self.cb = QComboBox(self)
-        self.cb.setStyleSheet('''QComboBox{
-        background-color:#2E2B2D;
-        color:white
-        }''')
+        self.cb.setStyleSheet('''
+        QComboBox {
+border: 1px solid rgb(117, 118, 118);
+        border-radius: 5px;
+        background: #2E2B2D; 
+        color:white;
+padding: 1px 2px 1px 2px;
+}
+        ''')
         self.cb.addItems(['酷狗', '网易云', 'qq', '酷我', '虾米', '百度', '一听'])
         self.up_layout.addWidget(self.cb, 0, 180, 1, 30)
         self.cb.currentIndexChanged[int].connect(self.print)
@@ -780,7 +921,7 @@ QLineEdit:focus {
         self.right_process_bar.setValue(49)
         self.right_process_bar.setFixedHeight(3)  # 设置进度条高度
         self.right_process_bar.setTextVisible(False)  # 不显示进度条文字
-        self.right_process_bar.setRange(0,10000)
+        self.right_process_bar.setRange(0, 10000)
 
         self.right_playconsole_widget = QtWidgets.QWidget()  # 播放控制部件
         self.right_playconsole_layout = QtWidgets.QGridLayout()  # 播放控制部件网格布局层
@@ -903,7 +1044,7 @@ QLineEdit:focus {
              background:#222225;
              border-top:1px solid #222225;
              border-bottom:1px solid #AD2121;
-             border-left:1px solid #222225;
+
              border-right:1px solid #222225;
              border-top-left-radius:10px;
              border-top-right-radius:10px;
@@ -953,18 +1094,157 @@ QLineEdit:focus {
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 隐藏边框
         self.main_layout.setSpacing(0)
 
-
-
     # 以下为窗口控制代码
+    def myListWidgetContext(self, point):
+        global numm
+        try:
+            # item = QListWidgetItem(self.listwidget.currentItem())
+            numm = int(self.listwidget.currentRow())
+            print(numm)
+        except:
+            pass
+        if not numm == -1:
+            global listq
+            listq = 'boing'
+            popMenu = QMenu()
+            popMenu.addAction(QAction(u'添加到喜爱的歌', self, triggered=self.addItem))
+            popMenu.addAction(QAction(u'从列表中删除', self, triggered=self.deItem))
+
+            popMenu.exec_(QtGui.QCursor.pos())
+
+    def myListWidgetContext2(self, point):
+        global numm
+        try:
+            # item = QListWidgetItem(self.listwidget.currentItem())
+            numm = int(self.listwidget2.currentRow())
+            print(numm)
+        except:
+            pass
+        if not numm == -1:
+            global listq
+            listq = 'boed'
+            popMenu = QMenu()
+            popMenu.addAction(QAction(u'添加到喜爱的歌', self, triggered=self.addItem))
+            popMenu.addAction(QAction(u'从列表中删除', self, triggered=self.deItem))
+
+            popMenu.exec_(QtGui.QCursor.pos())
+
+    def myListWidgetContext3(self, point):
+        global numm
+        try:
+            # item = QListWidgetItem(self.listwidget.currentItem())
+            numm = int(self.listwidget3.currentRow())
+            print(numm)
+        except:
+            pass
+        if not numm == -1:
+            global listq
+            listq = 'love'
+            popMenu = QMenu()
+            popMenu.addAction(QAction(u'从列表中删除', self, triggered=self.deItem))
+
+            popMenu.exec_(QtGui.QCursor.pos())
+
+    def addItem(self):
+        try:
+            global loves
+            global loveurls
+            global lovepics
+            global lovelrc
+            if listq == 'boing':
+                loves.append(songs[numm])
+                loveurls.append(urls[numm])
+                lovepics.append(pic[numm])
+                lovelrc.append(lrcs[numm])
+            else:
+                loves.append(songed[numm])
+                loveurls.append(urled[numm])
+                lovepics.append(picd[numm])
+                lovelrc.append(lrcd[numm])
+        except:
+            pass
+        r = 0
+        self.listwidget3.clear()
+        for i in loves:
+            # self.listwidget.addItem(i)#将文件名添加到listWidget
+
+            self.listwidget3.addItem(i)
+            self.listwidget3.item(r).setForeground(QtCore.Qt.white)
+            r = r + 1
+        print('done')
+        print(loves)
+
+    def lovesong(self):
+        if bo == 'boing' or bo == 'boed':
+            try:
+                global loves
+                global loveurls
+                global lovepics
+                global lovelrc
+                if bo == 'boing':
+                    loves.append(songs[numm])
+                    loveurls.append(urls[numm])
+                    lovepics.append(pic[numm])
+                    lovelrc.append(lrcs[numm])
+                else:
+                    loves.append(songed[numm])
+                    loveurls.append(urled[numm])
+                    lovepics.append(picd[numm])
+                    lovelrc.append(lrcd[numm])
+            except:
+                pass
+            r = 0
+            self.listwidget3.clear()
+            for i in loves:
+                # self.listwidget.addItem(i)#将文件名添加到listWidget
+
+                self.listwidget3.addItem(i)
+                self.listwidget3.item(r).setForeground(QtCore.Qt.white)
+                r = r + 1
+            print('done')
+            print(loves)
+        else:
+            pass
+
+    def deItem(self):
+        try:
+            if listq == 'boing':
+                global songs
+                global pic
+                global lrcs
+                global urls
+                self.listwidget.removeItemWidget(self.listwidget.takeItem(numm))
+                del songs[numm]
+                del pic[numm]
+                del lrcs[numm]
+                del urls[numm]
+            elif listq == 'boed':
+                global songed
+                global picd
+                global lrcd
+                global urled
+                self.listwidget2.removeItemWidget(self.listwidget2.takeItem(numm))
+                del songed[numm]
+                del picd[numm]
+                del lrcd[numm]
+                del urled[numm]
+            else:
+                global loves
+                global lovepics
+                global lovelrc
+                global loveurls
+                self.listwidget3.removeItemWidget(self.listwidget3.takeItem(numm))
+                del loves[numm]
+                del lovepics[numm]
+                del lovelrc[numm]
+                del loveurls[numm]
+        except:
+            pass
 
     # 创建右键菜单
 
     def down(self):
         call('explorer /select,{}'.format(to))
-
-    def rightMenuShow(self, x, y):
-        item = self.listwidget2.itemAt(x, y)
-        self.listwidget2.removeItemWidget(self.listwidget2.takeItem(self.listwidget2.row(item)))
 
     def page(self):
         global page
@@ -1009,11 +1289,32 @@ QLineEdit:focus {
             except:
                 pass
             try:
-                rmtree(str(data+'music'))
+                rmtree(str(data + 'music'))
                 # __import__('shutil').rmtree('music')
             except:
                 print('临时文件占用中，无法完全删除')
                 pass
+            filepath = '{}/musicdata'.format(apdata)
+            try:
+                os.mkdir(filepath)
+            except:
+                pass
+            print(filepath)
+            with open(filepath + "/loves", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(loves)))
+            with open(filepath + "/lovepics", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(lovepics)))
+            with open(filepath + "/loveurls", 'w',encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(loveurls)))
+            with open(filepath + "/lovelrc", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(lovelrc)))
+            with open(filepath + "/voice", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(voice)))
             sys.exit()
 
         else:
@@ -1047,17 +1348,41 @@ QLineEdit:focus {
         self.m_flag = False
 
     def closeEvent(self, event):
-        reply = QtWidgets.QMessageBox.question(self, u'警告', u'是否退出?', QtWidgets.QMessageBox.Yes,
+        reply = QtWidgets.QMessageBox.question(self, u'警告', u'确定退出?', QtWidgets.QMessageBox.Yes,
                                                QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
+            close = True
             try:
-                mixer.stop()
+                mixer.music.stop()
             except:
                 pass
             try:
-                rmtree(str(data+'music'))
+                rmtree(str(data + 'music'))
+                # __import__('shutil').rmtree('music')
+            except:
+                print('临时文件占用中，无法完全删除')
+                pass
+            filepath = '{}/musicdata'.format(apdata)
+            try:
+                os.mkdir(filepath)
             except:
                 pass
+            print(filepath)
+            with open(filepath + "/loves", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(loves)))
+            with open(filepath + "/lovepics", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(lovepics)))
+            with open(filepath + "/loveurls", 'w',encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(loveurls)))
+            with open(filepath + "/lovelrc", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(lovelrc)))
+            with open(filepath + "/voice", 'w', encoding='utf-8') as f:
+                f.truncate(0)
+                print(f.write(str(voice)))
             sys.exit()
 
 
@@ -1085,31 +1410,46 @@ QLineEdit:focus {
                 self.work22.start()
                 self.work22.trigger.connect(self.disbar)
             except:
-                print ('')
+                print('')
         except:
             pass
 
-    def disbar(self,apk):
+    def disbar(self, apk):
         if apk == 'nofinish':
-            print ('bar获取失败')
+            print('bar获取失败')
         else:
             try:
-                #print (apk)
+                # print (apk)
                 self.right_process_bar.setValue(int(apk))
             except:
-                print ('bar设置失败')
-
-
+                print('bar设置失败')
 
     def dispng(self, a):
 
         if a == 'finish':
-            pix_img = QtGui.QPixmap(str(data+'/backdown.png'))
+            pix_img = QtGui.QPixmap(str(data + '/backdown.png'))
             pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
             self.label5.setPixmap(pix)
-        else:
-            print('图片打开错误')
+        elif a == 'login':
+            r = 0
+            self.listwidget3.clear()
+            for i in loves:
+                # self.listwidget.addItem(i)#将文件名添加到listWidget
+
+                self.listwidget3.addItem(i)
+                self.listwidget3.item(r).setForeground(QtCore.Qt.white)
+                r = r + 1
             pass
+        elif a == 'voicedone':
+            try:
+                mixer.init()
+                mixer.music.set_volume(voice)
+                k = Decimal(voice).quantize(Decimal('0.00'))
+                self.label3.setText('音量：{}'.format(str(k * 100) + '%'))
+            except:
+                pass
+        else:
+            print ('图片下载错误')
 
     def correct(self):
         global name
@@ -1177,44 +1517,44 @@ QLineEdit:focus {
         try:
             audio = File(songs[num])
             mArtwork = audio.tags['APIC:'].data
-            with open(str(data+'/ls.png'), 'wb') as img:
+            with open(str(data + '/ls.png'), 'wb') as img:
                 img.write(mArtwork)
             try:
-                lsfile = str(data+'/ls.png')
-                safile = str(data+'/1.png')
+                lsfile = str(data + '/ls.png')
+                safile = str(data + '/1.png')
                 draw(lsfile, safile)
 
-                pix_img = QtGui.QPixmap(str(data+'/1.png'))
+                pix_img = QtGui.QPixmap(str(data + '/1.png'))
                 pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                 self.label5.setPixmap(pix)
             except:
                 print('图片处理错误')
-                pix_img = QtGui.QPixmap(str(data+'/ls.png'))
+                pix_img = QtGui.QPixmap(str(data + '/ls.png'))
                 pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                 self.label5.setPixmap(pix)
         except:
             print('没有图片')
-            if os.path.exists(str(data+'/backdown.png')):
-                pix_img = QtGui.QPixmap(str(data+'/backdown.png'))
+            if os.path.exists(str(data + '/backdown.png')):
+                pix_img = QtGui.QPixmap(str(data + '/backdown.png'))
                 pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                 self.label5.setPixmap(pix)
             else:
                 try:
                     req = requests.get('https://api.dujin.org/bing/1920.php')
-                    checkfile = open(str(data+'/ls2.png'), 'w+b')
+                    checkfile = open(str(data + '/ls2.png'), 'w+b')
                     for i in req.iter_content(100000):
                         checkfile.write(i)
 
                     checkfile.close()
-                    lsfile = str(data+'/ls2.png')
-                    safile = str(data+'/backdown.png')
+                    lsfile = str(data + '/ls2.png')
+                    safile = str(data + '/backdown.png')
                     draw(lsfile, safile)
-                    pix_img = QtGui.QPixmap(str(data+'/backdown.png'))
+                    pix_img = QtGui.QPixmap(str(data + '/backdown.png'))
                     pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                     self.label5.setPixmap(pix)
                 except:
                     print('默认图片下载错误')
-                    pix_img = QtGui.QPixmap(str(data+'/2.png'))
+                    pix_img = QtGui.QPixmap(str(data + '/2.png'))
                     pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                     self.label5.setPixmap(pix)
                     pass
@@ -1243,14 +1583,14 @@ QLineEdit:focus {
             except:
                 pass
             try:
-                    self.label.setText('正在寻找文件...')
-                    self.work = WorkThread()
-                    self.work.start()
-                    self.work.trigger.connect(self.display)
+                self.label.setText('正在寻找文件...')
+                self.work = WorkThread()
+                self.work.start()
+                self.work.trigger.connect(self.display)
             except:
-                    print('无法播放，歌曲下载错误')
-                    downloading = False
-                    pass
+                print('无法播放，歌曲下载错误')
+                downloading = False
+                pass
 
 
 
@@ -1272,29 +1612,31 @@ QLineEdit:focus {
             try:
                 if bo == 'boing':
                     self.label.setText(songs[num])
-                else:
+                elif bo == 'boed':
                     self.label.setText(songed[num])
+                elif bo == 'love':
+                    self.label.setText(loves[num])
                 try:
-                    pix_img = QtGui.QPixmap(str(data+'/back.png'))
+                    pix_img = QtGui.QPixmap(str(data + '/back.png'))
                     pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                     self.label5.setPixmap(pix)
                 except:
-                    pix_img = QtGui.QPixmap(str(data+'/backdown.png'))
+                    pix_img = QtGui.QPixmap(str(data + '/backdown.png'))
                     pix = pix_img.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
                     self.label5.setPixmap(pix)
-                print(str(data+'\{}.临时文件'.format(number)))
-                mixer.music.load(str(data+'\{}.临时文件'.format(number)))  # 载入音乐
+                print(str(data + '\{}.临时文件'.format(number)))
+                mixer.music.load(str(data + '\{}.临时文件'.format(number)))  # 载入音乐
                 mixer.music.play()
                 self.console_button_3.setIcon(qtawesome.icon('fa.pause', color='#F76677', font=18))
                 pause = False
                 try:
-                    mp3 = str(data+'\{}.临时文件'.format(number))
+                    mp3 = str(data + '\{}.临时文件'.format(number))
                     xx = load(mp3)
                     timenum = xx.info.time_secs
                     global start
                     start = True
                 except:
-                    print ('MP3错误，播放失败')
+                    print('MP3错误，播放失败')
 
                 if bo == 'boing':
                     songed.append(songs[num])
@@ -1317,16 +1659,16 @@ QLineEdit:focus {
         elif sd == 'nofinish':
             self.label.setText('下载错误')
         elif sd == 'lrcfinish':
-                r = 0
-                self.listwidget4.clear()
-                for i in lrct:
-                    # self.listwidget.addItem(i)#将文件名添加到listWidget
-                    if not i =='\r':
-                        self.listwidget4.addItem(i)
-                        self.listwidget4.item(r).setForeground(QtCore.Qt.white)
-                        r = r + 1
-                    else:
-                        pass
+            r = 0
+            self.listwidget4.clear()
+            for i in lrct:
+                # self.listwidget.addItem(i)#将文件名添加到listWidget
+                if not i == '\r':
+                    self.listwidget4.addItem(i)
+                    self.listwidget4.item(r).setForeground(QtCore.Qt.white)
+                    r = r + 1
+                else:
+                    pass
         elif sd == 'lrcnofinish':
             self.listwidget4.clear()
             self.listwidget4.addItem('纯音乐，请欣赏')
@@ -1474,6 +1816,31 @@ QLineEdit:focus {
                 downloading = False
                 pass
 
+    def change_funclove(self, listwidget):
+        global downloading
+        global bo
+        bo = 'love'
+        if downloading:
+            try:
+                self.nmsl.stop()
+            except:
+                print('下载无法停止')
+                pass
+        else:
+            try:
+                global num
+                item = QListWidgetItem(self.listwidget.currentItem())
+                print(item.text())
+                # print (item.flags())
+                num = int(listwidget.currentRow())
+                # self.label.setText(wenjianming)#设置标签的文本为音乐的名字
+                self.label.setText(loves[num])
+                print(listwidget.currentRow())
+                self.bofang(num, bo)
+            except:
+                downloading = False
+                pass
+
     def pause(self):
         global pause
         if pause:
@@ -1523,6 +1890,9 @@ QLineEdit:focus {
         if bo == 'boing':
             q = int(len(songs) - 1)
             num = int(random.randint(1, q))
+        elif bo == 'love':
+            q = int(len(loves) - 1)
+            num = int(random.randint(1, q))
         else:
             q = int(len(songed) - 1)
             num = int(random.randint(0, q))
@@ -1535,6 +1905,8 @@ QLineEdit:focus {
             # self.Timer.timeout.connect(self.timercontorl)#时间函数，与下面的进度条和时间显示有关
             if bo == 'boing':
                 self.label.setText(songs[num])
+            elif bo == 'love':
+                self.label.setText(loves[num])
             else:
                 self.label.setText(songed[num])
             self.bofang(num, bo)  # 播放音乐
@@ -1553,6 +1925,13 @@ QLineEdit:focus {
                 num = 0
             else:
                 num = num + 1
+        elif bo == 'love':
+            if num == len(loves) - 1:
+                print('冇')
+                num = 0
+            else:
+                num = num + 1
+
         else:
             if num == len(songed) - 1:
                 print('冇')
@@ -1562,6 +1941,8 @@ QLineEdit:focus {
         try:
             if bo == 'boing':
                 self.label.setText(songs[num])
+            elif bo == 'love':
+                self.label.setText(loves[num])
             else:
                 self.label.setText(songed[num])
             self.bofang(num, bo)
@@ -1589,6 +1970,12 @@ QLineEdit:focus {
                 num = len(songs) - 1
             else:
                 num = num - 1
+        elif bo == 'love':
+            if num == 0:
+                print('冇')
+                num = len(loves) - 1
+            else:
+                num = num - 1
         else:
             if num == 0:
                 print('冇')
@@ -1598,6 +1985,8 @@ QLineEdit:focus {
         try:
             if bo == 'boing':
                 self.label.setText(songs[num])
+            elif bo == 'love':
+                self.label.setText(loves[num])
             else:
                 self.label.setText(songed[num])
             self.bofang(num, bo)  # 播放音乐
@@ -1650,28 +2039,30 @@ def main():
     gui.show()
     sys.exit(app.exec_())
 
+
 def get_info(url):
-        print('开始获取代理IP地址...')
-        print('尝试次数{}'.format(tryed))
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/491.10.2623.122 Safari/537.36'
+    print('开始获取代理IP地址...')
+    print('尝试次数{}'.format(tryed))
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/491.10.2623.122 Safari/537.36'
+    }
+    web_data = requests.get(url, headers=headers)
+    soup = BeautifulSoup(web_data.text, 'lxml')
+    ranks = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(tryed)))
+    titles = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(tryed)))
+    times = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(6)'.format(str(tryed)))
+    for rank, title, time in zip(ranks, titles, times):
+        data = {
+            'IP': rank.get_text(),
+            'duan': title.get_text(),
+            'time': time.get_text()
         }
-        web_data = requests.get(url, headers=headers)
-        soup = BeautifulSoup(web_data.text, 'lxml')
-        ranks = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(tryed)))
-        titles = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(tryed)))
-        times = soup.select('#list > table > tbody > tr:nth-child({}) > td:nth-child(6)'.format(str(tryed)))
-        for rank, title, time in zip(ranks, titles, times):
-            data = {
-                'IP': rank.get_text(),
-                'duan': title.get_text(),
-                'time': time.get_text()
-            }
-            q = str('http://' + str(rank.get_text()) + '/' + str(title.get_text()))
-            proxies = {
-                'http': q
-            }
-            print('代理IP地址：{}'.format(proxies))
+        q = str('http://' + str(rank.get_text()) + '/' + str(title.get_text()))
+        proxies = {
+            'http': q
+        }
+        print('代理IP地址：{}'.format(proxies))
+
 
 if __name__ == '__main__':
     main()
